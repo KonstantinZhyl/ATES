@@ -1,0 +1,20 @@
+<style>
+  label, label > span { display: block; }
+  label { margin: 15px 0; }
+</style>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="notification is-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+<!--<a href="/">Home</a>-->
+<form action="" method="post">
+  <label>
+    <span>Task description</span>
+    <textarea name="description" cols="30" rows="10"></textarea>
+  </label>
+  <button>Submit</button>
+</form>

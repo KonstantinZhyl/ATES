@@ -1,0 +1,22 @@
+<!-- templates/profile.html -->
+
+{% extends "base.html" %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="notification is-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+
+{% block content %}
+<h1 class="title">
+  Welcome, {{ current_user.email }}!
+</h1>
+
+{%for task in tasks%}
+<li>{{task.description}} {{task.status.name}} {% if task.status.name == 'IN_PROGRESS' %} <a href="{{ url_for('main.close_task', task_id=task.id) }}"><u>Mark as done</u></a> {% endif %}</li>
+{%endfor%}
+
+{% endblock %}

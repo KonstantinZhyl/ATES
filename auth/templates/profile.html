@@ -1,0 +1,23 @@
+<!-- templates/profile.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+  Welcome, {{ name }}!
+</h1>
+
+{% if current_user.is_admin %}
+ <a href="/create_client">Create client</a>
+{% endif %}
+
+  {% if current_user.is_authenticated %}
+    <h2 class="clients">
+      Clients list:
+    </h2>
+
+      {%for client in clients_list%}
+      <li>{{client.client_metadata['client_name']}} <a href="{{ url_for('main.authorize', client_id=client.client_id) }}">{{client.client_metadata['client_uri']}}</a></li>
+      {%endfor%}
+  {% endif %}
+{% endblock %}
