@@ -19,14 +19,14 @@ def index():
 @login_required
 def profile():
     clients_list = OAuth2Client.query.all()
-    return render_template('profile.html', name=current_user.name, clients_list=clients_list)
+    return render_template('balance.html', name=current_user.name, clients_list=clients_list)
 
 
 @main.route('/create_client', methods=('GET', 'POST'))
 @login_required
 def create_client():
     if request.method == 'GET':
-        return render_template('create_task.html')
+        return render_template('create_client.html')
 
     client_id = gen_salt(24)
     client_id_issued_at = int(time.time())
@@ -76,7 +76,9 @@ def authorize(client_id):
         db.session.add(token)
         db.session.commit()
 
-    return redirect(f'http://127.0.0.1:8081/login/{token.access_token}')
+    client = OAuth2Client.query.filter_by(client_id=client_id).first()
+
+    return redirect(f'http://{client.client_metadata["client_uri"]}/login/{token.access_token}')
 
 
 @main.route('/oauth/check_token/<access_token>', methods=['GET'])

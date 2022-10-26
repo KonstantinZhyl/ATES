@@ -1,0 +1,67 @@
+<!-- templates/balance.html -->
+
+{% extends "base.html" %}
+
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="notification is-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+
+{% block content %}
+<h1 class="title">
+  Welcome, {{ current_user.email }}!
+</h1>
+
+{% if not current_user.is_manager() %}
+
+<h2 class="balance">
+  Your current balance: {{ balance }}
+</h2>
+
+<h2 class="logs-title">
+  Transactions
+</h2>
+
+<table style="width:100%">
+    <tr>
+        <th>description</th>
+        <th>credit</th>
+        <th>debit</th>
+        <th>time</th>
+    </tr>
+    {%for log in logs%}
+        <tr>
+            <td>{{ log['description'] }}</td>
+            <td> {{ log['credit'] }}</td>
+            <td> {{ log['debit'] }}</td>
+            <td> {{ log['created_at'] }}</td>
+        </tr>
+    {%endfor%}
+</table>
+
+
+{% endif %}
+
+{% if current_user.is_manager() %}
+
+<h2 class="title">
+  Popugs current stats:
+</h2>
+
+{%for balance in balances%}
+    <li>{{ balance['user'] }}  {{ balance['balance'] }}</li>
+{%endfor%}
+
+{% endif %}
+
+
+{% endblock %}

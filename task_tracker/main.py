@@ -1,8 +1,14 @@
+import datetime
+import uuid
 from random import randint
+
 from flask import Blueprint, request, flash
 from flask_login import login_required, current_user
 from flask import render_template, redirect, url_for
+from kafka_producer import kafka_send_message
 from models import db, User, Task, UserRole, TaskStatus
+from utils import validate_schema
+from settings import (TASK_CLOSED_EVENT_VERSION, TASK_CREATED_EVENT_VERSION, TASKS_REASSIGNED_EVENT_VERSION)
 
 
 main = Blueprint('main', __name__)
@@ -22,13 +28,13 @@ def index():
 @login_required
 def profile():
     tasks = Task.query.filter_by(user_id=current_user.id).all()
-    return render_template('profile.html', tasks=tasks)
+    return render_template('balance.html', tasks=tasks)
 
 
 @main.route('/create_task')
 @login_required
 def create_task():
-    return render_template('create_task.html')
+    return render_template('analytics.html')
 
 
 @main.route('/create_task', methods=['POST'])
@@ -42,11 +48,27 @@ def create_task_post():
         flash('No available users to attach this task to')
         return redirect(url_for('main.create_task'))
 
-    new_task = Task(description=description, user_id=users[randint(0, len(users) - 1)].id)
+    random_user = users[randint(0, len(users) - 1)]
+    new_task = Task(description=description, user_id=random_user.id)
 
     # add the new user to the database
     db.session.add(new_task)
     db.session.commit()
+
+    event = {
+        'event_version': TASK_CREATED_EVENT_VERSION,
+        'event_id': str(uuid.uuid4()),
+        'event_name': 'task.created',
+        'event_created_at': datetime.datetime.now().isoformat(),
+        'task': {
+            'description': new_task.description,
+            'user_id': str(random_user.public_id),
+            'public_id': str(new_task.public_id),
+        }
+    }
+
+    if validate_schema('task.created', TASK_CREATED_EVENT_VERSION, event):
+        kafka_send_message(message=event, topic='tasks-stream')
 
     return redirect(url_for('main.profile'))
 
@@ -57,6 +79,19 @@ def close_task(task_id):
     task = Task.query.filter_by(id=task_id).first()
     task.status = TaskStatus.DONE.name
     db.session.commit()
+
+    event = {
+        'event_version': TASK_CLOSED_EVENT_VERSION,
+        'event_id': str(uuid.uuid4()),
+        'event_name': 'task.closed',
+        'event_created_at': datetime.datetime.now().isoformat(),
+        'task': {
+            'public_id': str(task.public_id),
+        }
+    }
+    if validate_schema('task.closed', TASK_CLOSED_EVENT_VERSION, event):
+        kafka_send_message(message=event, topic='tasks-stream')
+
     return redirect(url_for('main.profile'))
 
 
@@ -65,8 +100,27 @@ def close_task(task_id):
 def reassign_tasks():
     users = User.query.filter_by(role=UserRole.EMPLOYEE.name).all()
     tasks = Task.query.filter_by(status=TaskStatus.IN_PROGRESS.name).all()
+    user_task_mapping = []
     for task in tasks:
-        task.user_id = users[randint(0, len(users) - 1)].id
-    db.session.commit()
+        user = users[randint(0, len(users) - 1)]
+        task.user_id = user.id
+        user_task_mapping.append({
+            'user_id': str(user.public_id),
+            'task_id': str(task.public_id),
+        })
+        db.session.commit()
+
+    event = {
+        'event_version': TASKS_REASSIGNED_EVENT_VERSION,
+        'event_id': str(uuid.uuid4()),
+        'event_name': 'tasks.reassigned',
+        'event_created_at': datetime.datetime.now().isoformat(),
+        'data': {
+            'user_task_mapping': user_task_mapping,
+        }
+    }
+
+    if validate_schema('tasks.reassigned', TASKS_REASSIGNED_EVENT_VERSION, event):
+        kafka_send_message(message=event, topic='tasks-stream')
     flash('Tasks reassigned!')
     return redirect(url_for('main.profile'))

@@ -1,0 +1,44 @@
+{
+  "name": "task.created",
+  "type": "record",
+  "namespace": "tasks",
+  "fields": [
+    {
+      "name": "event_version",
+      "type": "float"
+    },
+    {
+      "name": "event_id",
+      "type": "string"
+    },
+    {
+      "name": "event_name",
+      "type": "string"
+    },
+    {
+      "name": "event_created_at",
+      "type": "string"
+    },
+    {
+      "name": "task",
+      "type": {
+        "name": "task",
+        "type": "record",
+        "fields": [
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "user_id",
+            "type": "string"
+          },
+          {
+            "name": "public_id",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
