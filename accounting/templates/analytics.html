@@ -1,0 +1,68 @@
+<!-- templates/balance.html -->
+
+{% extends "base.html" %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="notification is-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+
+{% block content %}
+<h1 class="title">
+  Welcome, {{ current_user.email }}!
+</h1>
+
+{% if current_user.is_admin() %}
+
+<h1 class="title">
+  Managers earned today: {{ managers_balance }}$!
+</h1>
+<h1 class="title">
+  {{ debtors }} popugs are debtors today :D
+</h1>
+
+<h1 class="title">
+  Tasks statistics:
+</h1>
+
+<h2 class="title">
+  Most expensive task Daily
+</h2>
+
+<table style="width:100%">
+    <tr>
+        <th>Day</th>
+        <th>Price</th>
+    </tr>
+    {%for task in tasks_daily%}
+        <tr>
+            <td>{{ task[0] }}$</td>
+            <td> {{ task[1] }}$</td>
+        </tr>
+    {%endfor%}
+</table>
+
+<h2 class="title">
+  Most expensive task Monthly
+</h2>
+
+<table style="width:100%">
+    <tr>
+        <th>Month</th>
+        <th>Price</th>
+    </tr>
+    {%for task in tasks_monthly%}
+        <tr>
+            <td>{{ task[0] }}$</td>
+            <td> {{ task[1] }}$</td>
+        </tr>
+    {%endfor%}
+</table>
+
+{% endif %}
+
+
+{% endblock %}

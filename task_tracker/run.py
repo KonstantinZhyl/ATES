@@ -4,6 +4,8 @@ from app import create_app
 from flask_kafka import FlaskKafka
 from models import db, User
 from threading import Event
+from settings import USER_CREATED_EVENT_VERSION
+from utils import validate_schema
 
 
 app = create_app({
@@ -21,7 +23,7 @@ INTERRUPT_EVENT = Event()
 event_bus = FlaskKafka(
     INTERRUPT_EVENT,
     bootstrap_servers=",".join(["localhost:9092"]),
-    group_id="consumer-grp-id"
+    group_id="task-tracker"
 )
 
 
@@ -38,14 +40,17 @@ def accounts_stream_topic_handler(msg):
     print(event)
 
     if event['event_name'] == 'user.created':
-        user_data = event['user']
-        with app.app_context():
-            user = User(email=user_data['email'], public_id=user_data['public_id'], role=user_data['role'])
-            db.session.add(user)
-            db.session.commit()
-        print('New user added to our db')
+        if event['event_version'] == USER_CREATED_EVENT_VERSION \
+                and validate_schema('user.created', USER_CREATED_EVENT_VERSION, event):
+            user_data = event['user']
+            with app.app_context():
+                user = User(email=user_data['email'], public_id=user_data['public_id'], role=user_data['role'])
+                db.session.add(user)
+                db.session.commit()
+            print('New user added to our db')
 
 
 event_bus.run()
 listen_kill_server()
 app.run(host='127.0.0.1', port=8081)
+

@@ -1,0 +1,48 @@
+{
+  "name": "user.created",
+  "type": "record",
+  "namespace": "users",
+  "fields": [
+    {
+      "name": "event_version",
+      "type": "float"
+    },
+    {
+      "name": "event_id",
+      "type": "string"
+    },
+    {
+      "name": "event_name",
+      "type": "string"
+    },
+    {
+      "name": "event_created_at",
+      "type": "string"
+    },
+    {
+      "name": "user",
+      "type": {
+        "name": "userData",
+        "type": "record",
+        "fields": [
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "public_id",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}

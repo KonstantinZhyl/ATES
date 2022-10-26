@@ -1,0 +1,36 @@
+{
+  "name": "task.closed",
+  "type": "record",
+  "namespace": "tasks",
+  "fields": [
+    {
+      "name": "event_version",
+      "type": "float"
+    },
+    {
+      "name": "event_id",
+      "type": "string"
+    },
+    {
+      "name": "event_name",
+      "type": "string"
+    },
+    {
+      "name": "event_created_at",
+      "type": "string"
+    },
+    {
+      "name": "task",
+      "type": {
+        "name": "task",
+        "type": "record",
+        "fields": [
+          {
+            "name": "public_id",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}

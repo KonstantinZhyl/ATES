@@ -1,10 +1,15 @@
 # auth.py
+import json
+import datetime
+import uuid
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from kafka_producer import kafka_send_message
 from models import db, User
+from utils import validate_schema
+from settings import USER_CREATED_EVENT_VERSION
 
 auth = Blueprint('auth', __name__)
 
@@ -55,20 +60,21 @@ def signup_post():
     db.session.add(new_user)
     db.session.commit()
 
-    user = User.query.filter_by(email=email).first()
-
     user_created_cud = {
-        'event_version': 0.1,
+        'event_version': USER_CREATED_EVENT_VERSION,
+        'event_id': str(uuid.uuid4()),
         'event_name': 'user.created',
+        'event_created_at': datetime.datetime.now().isoformat(),
         'user': {
-            'email': user.email,
-            'name': user.name,
-            'public_id': user.public_id,
-            'role': user.role,
+            'email': new_user.email,
+            'name': new_user.name,
+            'public_id': str(new_user.public_id),
+            'role': new_user.role.name,
         }
     }
 
-    kafka_send_message(message=user_created_cud, topic='accounts-stream')
+    if validate_schema('user.created', USER_CREATED_EVENT_VERSION, user_created_cud):
+        kafka_send_message(message=user_created_cud, topic='accounts-stream')
 
     return redirect(url_for('auth.login'))
 

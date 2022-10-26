@@ -1,0 +1,52 @@
+{
+  "name": "tasks.reassigned",
+  "type": "record",
+  "namespace": "tasks",
+  "fields": [
+    {
+      "name": "event_version",
+      "type": "float"
+    },
+    {
+      "name": "event_id",
+      "type": "string"
+    },
+    {
+      "name": "event_name",
+      "type": "string"
+    },
+    {
+      "name": "event_created_at",
+      "type": "string"
+    },
+    {
+      "name": "data",
+      "type": {
+        "name": "data",
+        "type": "record",
+        "fields": [
+          {
+            "name": "user_task_mapping",
+            "type": {
+              "type": "array",
+              "items": {
+                "name": "user_task_mapping_record",
+                "type": "record",
+                "fields": [
+                  {
+                    "name": "user_id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "task_id",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
