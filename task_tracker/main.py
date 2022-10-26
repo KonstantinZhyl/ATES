@@ -1,5 +1,6 @@
 import datetime
 import uuid
+import re
 from random import randint
 
 from flask import Blueprint, request, flash
@@ -28,13 +29,27 @@ def index():
 @login_required
 def profile():
     tasks = Task.query.filter_by(user_id=current_user.id).all()
-    return render_template('balance.html', tasks=tasks)
+    return render_template('profile.html', tasks=tasks)
 
 
 @main.route('/create_task')
 @login_required
 def create_task():
-    return render_template('analytics.html')
+    return render_template('create_task.html')
+
+
+def _extract_jira_id(description):
+    match = re.search(r'\[(.+)\]', description)
+    if match:
+        return match.groups()[0]
+    return None
+
+
+def _extract_description(description):
+    match = re.search(r'\[(.+)\]\s*(.+)$', description)
+    if match:
+        return match.groups()[1]
+    return description
 
 
 @main.route('/create_task', methods=['POST'])
@@ -49,7 +64,10 @@ def create_task_post():
         return redirect(url_for('main.create_task'))
 
     random_user = users[randint(0, len(users) - 1)]
-    new_task = Task(description=description, user_id=random_user.id)
+
+    jira_id = _extract_jira_id(description)
+    description = _extract_description(description)
+    new_task = Task(jira_id=jira_id, description=description, user_id=random_user.id)
 
     # add the new user to the database
     db.session.add(new_task)
@@ -62,12 +80,14 @@ def create_task_post():
         'event_created_at': datetime.datetime.now().isoformat(),
         'task': {
             'description': new_task.description,
+            'jira_id': jira_id,
             'user_id': str(random_user.public_id),
             'public_id': str(new_task.public_id),
         }
     }
 
     if validate_schema('task.created', TASK_CREATED_EVENT_VERSION, event):
+        print('Task sent to kafka')
         kafka_send_message(message=event, topic='tasks-stream')
 
     return redirect(url_for('main.profile'))

@@ -3,7 +3,7 @@ from flask_login import LoginManager
 
 from auth import auth as auth_blueprint
 from main import main as main_blueprint
-from models import db, User
+from models import db, migrate, User
 
 
 # init SQLAlchemy so we can use it later in our models
@@ -41,4 +41,5 @@ def setup_app(app):
     # @app.before_first_request
 
     db.init_app(app)
+    migrate.init_app(app, db)
     # app.register_blueprint(bp, url_prefix='')

@@ -69,6 +69,7 @@ def tasks_stream_topic_handler(msg):
                 close_price = randint(20, 40)
                 task = Task(
                     description=task_data['description'],
+                    jira_id=task_data['jira_id'],
                     public_id=task_data['public_id'],
                     user_id=user.id,
                     assign_price=assign_price,
@@ -194,8 +195,8 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(close_daily_transactions, 'cron', day_of_week='mon-sun', hour=0, minute=0)
 scheduler.start()
 
-# event_bus.run()
-# listen_kill_server()
+event_bus.run()
+listen_kill_server()
 app.run(host='127.0.0.1', port=8082)
 
 # Shut down the scheduler when exiting the app

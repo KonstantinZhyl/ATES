@@ -9,11 +9,6 @@ kafka_producer = KafkaProducer(
     api_version=(0, 11, 15)
 )
 
-USER_CREATED_EVENT_VERSION = 0.1
-TASK_CREATED_EVENT_VERSION = 0.1
-TASK_CLOSED_EVENT_VERSION = 0.1
-TASKS_REASSIGNED_EVENT_VERSION = 0.1
-
 
 def kafka_send_message(message: dict, topic: str):
     json_payload = json.dumps(message, cls=UUIDEncoder).encode()

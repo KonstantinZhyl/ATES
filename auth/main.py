@@ -19,7 +19,7 @@ def index():
 @login_required
 def profile():
     clients_list = OAuth2Client.query.all()
-    return render_template('balance.html', name=current_user.name, clients_list=clients_list)
+    return render_template('profile.html', name=current_user.name, clients_list=clients_list)
 
 
 @main.route('/create_client', methods=('GET', 'POST'))

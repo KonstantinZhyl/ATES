@@ -1,12 +1,14 @@
 import enum
 import uuid
 from flask_login import UserMixin
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import Enum
 
 
 db = SQLAlchemy()
+migrate = Migrate()
 
 
 class UserRole(enum.Enum):
@@ -41,5 +43,6 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False)
     description = db.Column(db.String(100), unique=True, nullable=False)
+    jira_id = db.Column(db.String(100), unique=True, nullable=False)
     status = db.Column(Enum(TaskStatus), default=TaskStatus.IN_PROGRESS.name)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id, ondelete='CASCADE'))

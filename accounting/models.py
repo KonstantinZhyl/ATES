@@ -35,6 +35,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False)
     description = db.Column(db.String(100), unique=True, nullable=False)
+    jira_id = db.Column(db.String(100), unique=True, nullable=False)
     close_price = db.Column(db.Integer)
     assign_price = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id, ondelete='CASCADE'))
