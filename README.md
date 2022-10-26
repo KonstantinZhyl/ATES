@@ -14,9 +14,9 @@
 
 In this architecture: Domains == Services
 
-![](../../../../var/folders/6d/s5zfgr3x7kbctl1yqw_vtrhw0000gn/T/TemporaryItems/NSIRD_screencaptureui_VKq9Il/Screenshot 2022-10-21 at 18.43.30.png)
+![](assets/event_storming.png)
 
-![](../../../../var/folders/6d/s5zfgr3x7kbctl1yqw_vtrhw0000gn/T/TemporaryItems/NSIRD_screencaptureui_d0cRPm/Screenshot 2022-10-21 at 18.43.52.png)
+![](assets/data_model.png)
 
 Services connections:
 
